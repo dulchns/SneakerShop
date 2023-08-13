@@ -1,0 +1,173 @@
+.user-container {
+    display: flex;
+    justify-content: center;
+    gap: 2%;
+    padding: 10px 0;
+}
+
+.user-container .sign-up,
+.user-container .login {
+    width: 100%;
+    max-width: 400px;
+}
+
+.user-form-title {
+    padding: 15px 0;
+}
+
+.user-container label {
+    display: block;
+}
+
+.user-container input {
+    display: block;
+    padding: 5px;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    border: none;
+    font-size: 1.2em;
+    background-color: #f4f4f4;
+}
+
+.user-container input[type="submit"] {
+    background-color: #7457f7;
+    color: #fafafa;
+}
+
+.user-container input[type="submit"]:hover {
+    background-color: #6048ca;
+}
+
+.user-container input[type="submit"]:active {
+    transform: scale(0.995);
+}
+
+.user-container input:focus {
+    outline: 1px solid #e7e7e7;
+}
+
+.user-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.user-panel {
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+    gap: 2px;
+    width: 100%;
+    max-width: 200px;
+    border: 1px solid #f4f4f4;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #fafafa;
+}
+
+.user-panel-btn {
+    border: none;
+    min-height: 35px;
+    font-size: 1em;
+    background-color: #f4f4f4;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.user-panel-btn:hover {
+    background-color: #e7e7e7;
+}
+
+.user-panel-btn:active {
+    font-size: 0.95em;
+}
+
+.user-card {
+    flex-grow: 1;
+    padding: 5px;
+    border: 1px solid #f4f4f4;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #fafafa;
+}
+
+.user-card .login-box {
+    display: flex;
+    gap: 10px;
+}
+
+.user-card .order-container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fafafa;
+    font-weight: bold;
+    background-color: #b991e7;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.user-card .order-container p:nth-child(2) {
+    flex-grow: 1;
+    padding-left: 6px;
+    border-left: 2px solid #fafafa;
+}
+
+.order-history-expanded {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    max-height: 0;
+    gap: 5%;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-bottom: 2px solid #e7e7e7;
+    transition: all 0.5s;
+    overflow: hidden;
+}
+
+.order-history-expanded.opened {
+    max-height: 100%;
+    transition: all 0.5s;
+}
+
+.order-details .details-title {
+    padding-top: 5px;
+    text-align: center;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.order-data-list li {
+    padding: 5px 0;
+}
+
+.order-shopping-table {
+    border-collapse: collapse;
+    flex-grow: 1;
+}
+
+.order-shopping-table td, th {
+    padding: 5px 0;
+    border: 1px solid #e7e7e7;
+}
+
+.order-shopping-table td:nth-child(1) {
+    padding-left: 5px;
+}
+
+.order-shopping-table td:not(:nth-child(1)) {
+    text-align: center;
+}
+
+.order-shopping-table .bill-title {
+    text-align: center;
+    font-weight: bold;
+}

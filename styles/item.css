@@ -1,0 +1,41 @@
+.shop-item {
+    display: flex;
+    justify-content: center;
+    gap: 10%;
+}
+
+.img-item-box {
+    width: 30%;
+}
+
+.about-item-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    max-width: 30%;
+}
+
+.shop-item .btn-box {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-box button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4681f4;
+    font-size: 1em;
+    color: #fafafa;
+    transition: background-color 1s;
+}
+
+.btn-box button:hover {
+    background-color: #3c6ed1;
+}
+
+.btn-box button:active {
+    transform: scale(0.99);
+}

@@ -1,0 +1,20 @@
+.notification {
+    display: flex;
+    align-items: center;
+    gap: 2%;
+    padding: 15px 10px;
+    width: 100%;
+    max-width: 400px;
+    border: none;
+    border-radius: 10px;
+    color: #ffffff;
+    transition: 1s transform;
+}
+
+.notification img {
+    max-width: 30px;
+}
+
+.notification p {
+    flex-grow: 1;
+}
