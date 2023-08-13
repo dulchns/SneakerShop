@@ -134,8 +134,7 @@ export class Checkout {
                                  ...orderData, 
                                  'data': billingData }
         const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'))
-        const users = User.getUsers().filter(user => user.id !== loggedUser.id)
-
+        const users = User.getUsers().filter(user => user.login !== loggedUser.login)
         localStorage.setItem('lastorder', JSON.stringify(completeOrder))
         loggedUser.orders.push(completeOrder)
         users.push(loggedUser)

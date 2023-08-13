@@ -23,7 +23,6 @@ export class User {
         const loginValidate = allUsers.find(user => user.login === login)
     
         if(loginValidate && loginValidate.password === password) {
-            console.log('+++')
             localStorage.setItem('loggedInUser', JSON.stringify(loginValidate))
             document.querySelector('.user-container').innerHTML = ''
             localStorage.setItem('wishlist', JSON.stringify(loginValidate.wishlist))
@@ -291,20 +290,8 @@ export class User {
         const profileContainer = document.createElement('div')
         profileContainer.classList.add('profile-container')
 
-        /*const editField = (field) => {
-            field.style.display = 'none'
-
-        }*/
-
-        const loginBox = document.createElement('div')
-        loginBox.classList.add('login-box')
         const userLogin = document.createElement('p')
         userLogin.textContent = `Login: ${user.login}`
-        userLogin.dataset.field = 'login'
-        const editBtn = document.createElement('span')
-        editBtn.classList.add('edit-profile-field')
-        editBtn.textContent = 'Edit'
-        loginBox.append(userLogin, editBtn)
         
         const userFirstName = document.createElement('p')
         userFirstName.textContent = `First name: ${user.fisrtName}`
@@ -318,12 +305,7 @@ export class User {
         const userPhone = document.createElement('p')
         userPhone.textContent =  `Phone: ${user.phone || 'Not specified'}`
 
-        profileContainer.append(/*userLogin*/loginBox, userFirstName, userLastName, userEmail, userPhone)
-
-        /*profileContainer.querySelectorAll('.edit-profile-field').forEach(btn => btn.addEventListener('click', (evt) => {
-            const fieldName = btn.previousElementSibling.dataset.field
-            console.log(user[fieldName])
-        }))*/
+        profileContainer.append(userLogin, userFirstName, userLastName, userEmail, userPhone)
 
         return profileContainer
     }
