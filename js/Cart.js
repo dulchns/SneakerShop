@@ -1,5 +1,6 @@
 import { Router } from "./Router.js"
 import { Notification } from "./Notification.js"
+import { createElement } from "./app.js"
 
 export class Cart {
     static getCartItems() {
@@ -9,49 +10,34 @@ export class Cart {
     }
 
     static render() {
-        const container = document.createElement('div')
-        container.classList.add('cart')
+        const container = createElement('div', 'cart')
         const cartItems = Cart.getCartItems()
 
         if(cartItems.length === 0) {
             new Notification('Cart is empty :(').render(container, 'static', 'message')
 
-            const backBtn = document.createElement('button')
-            backBtn.textContent = 'Back to shopping!'
-            backBtn.classList.add('back-btn')
+            const backBtn = createElement('button', 'back-btn', 'Back to shopping!')
             backBtn.addEventListener('click', () => Router.route(this, '/'))
-
             container.append(backBtn)
             document.querySelector('.app').append(container)
             return
         }
 
-        const table = document.createElement('table')
-        table.classList.add('cart-table')
-
-        const thRow = document.createElement('tr')
-        thRow.classList.add('cart-table-header')
-        const thNo = document.createElement('th')
-        thNo.textContent = '№'
-        const thImg = document.createElement('th')
-        const thProduct = document.createElement('th')
-        thProduct.textContent = 'Product'
-        const thQty = document.createElement('th')
-        thQty.textContent = 'Qty'
-        const thPrice = document.createElement('th')
-        thPrice.textContent = 'Price'
-        const thTotal = document.createElement('th')
-        thTotal.textContent = 'Total'
-        thRow.append(thNo, thImg, thProduct, thQty, thPrice, thTotal)
+        const table = createElement('table', 'cart-table')
+        const thRow = createElement('tr', 'cart-table-header')
+        const thNo = createElement('th', null, '№')
+        const thProduct = createElement('th', null, 'Product')
+        thProduct.colSpan = 2
+        const thQty = createElement('th', null, 'Qty')
+        const thPrice = createElement('th', null, 'Price')
+        const thTotal = createElement('th', null, 'Total')
+        thRow.append(thNo, thProduct, thQty, thPrice, thTotal)
         const elements = cartItems.map((el, index) => Cart.createCartElement(el, index + 1))
         table.append(thRow, ...elements)
 
-        const cartToOrderContainer = document.createElement('div')
-        cartToOrderContainer.classList.add('cart-to-order')
+        const cartToOrderContainer = createElement('div', 'cart-to-order')
+        const purchaseBtn = createElement('button', 'purchase-btn', 'Proceed to purchase')
 
-        const purchaseBtn = document.createElement('button')
-        purchaseBtn.classList.add('purchase-btn')
-        purchaseBtn.textContent = 'Proceed to purchase'
         purchaseBtn.addEventListener('click', () => {
             const subTotal = Cart.total()
             const tax = 0
@@ -62,13 +48,8 @@ export class Cart {
             Router.route(this, '/cart#checkout')
         })
 
-        const totalPrice = document.createElement('p')
-        totalPrice.classList.add('total-price')
-        totalPrice.textContent = `Total price: $${Cart.total()}`
-
-        const clearAllCartBtn = document.createElement('p')
-        clearAllCartBtn.classList.add('clear-cart-btn')
-        clearAllCartBtn.textContent = 'Clear cart'
+        const totalPrice = createElement('p', 'total-price', `Total price: $${Cart.total()}`)
+        const clearAllCartBtn = createElement('p', 'clear-cart-btn', 'Clear cart')
         clearAllCartBtn.addEventListener('click', () => {
             Cart.clearAll()
             document.querySelector('.app').innerHTML = ''
@@ -82,34 +63,19 @@ export class Cart {
 
     static createCartElement(item, index) {
         const { brand, model, price, image } = item[0]
-
-        const elRow = document.createElement('tr')
-        const elNo = document.createElement('td')
-        elNo.classList.add('no-data')
-        const elImg = document.createElement('td')
-        elImg.classList.add('img-data')
-        const img = document.createElement('img')
+        const elRow = createElement('tr')
+        const elNo = createElement('td', 'no-data', `${index}`)
+        const elImg = createElement('td', 'img-data')
+        const img = createElement('img')
         img.src = image
         elImg.append(img)
-        const elProduct = document.createElement('td')
-        elProduct.classList.add('title-data')
-        const elQty = document.createElement('td')
-        elQty.classList.add('qty-data')
-        const elPrice = document.createElement('td')
-        elPrice.classList.add('price-data')
-        const elTotalPrice = document.createElement('td')
-        elTotalPrice.classList.add('price-data')
-
-        elNo.textContent = `${index}`
-        elProduct.textContent = `${brand} ${model}`
-        elPrice.textContent = `$${price}`
-        elTotalPrice.textContent = `$${price * item[1]}`
-
-        const elQtyPlusBtn = document.createElement('span')
-        elQtyPlusBtn.textContent = '+'
-        const elQtyMinusBtn = document.createElement('span')
-        elQtyMinusBtn.textContent = '–'
-        const elQtyInput = document.createElement('input')
+        const elProduct = createElement('td', 'title-data', `${brand} ${model}`)
+        const elQty = createElement('td', 'qty-data')
+        const elPrice = createElement('td', 'price-data', `$${price}`)
+        const elTotalPrice = createElement('td', 'price-data', `$${price * item[1]}`)
+        const elQtyPlusBtn = createElement('span', null, '+')
+        const elQtyMinusBtn = createElement('span', null, '–')
+        const elQtyInput = createElement('input')
         elQtyInput.value = item[1]
         elQtyInput.readOnly = true
         elQtyMinusBtn.addEventListener('click', () => {
@@ -131,20 +97,16 @@ export class Cart {
             document.querySelector('.total-price').textContent = `Total price: $${Cart.total()}`
         })
 
-        const deleteBtnTd = document.createElement('td')
-        deleteBtnTd.classList.add('delete-data')
-        const deleteBtn = document.createElement('span')
-        deleteBtn.classList.add('delete-from-cart-btn')
-        deleteBtn.textContent = 'Delete'
+        const deleteBtnTd = createElement('td', 'delete-data')
+        const deleteBtn = createElement('span', 'delete-from-cart-btn', 'Delete')
         deleteBtn.addEventListener('click', () => {
             Cart.removeFromCart(item)
             document.querySelector('.app').innerHTML = ''
             Cart.render()
         })
+
         deleteBtnTd.append(deleteBtn)
-
         elQty.append(elQtyMinusBtn, elQtyInput, elQtyPlusBtn)
-
         elRow.append(elNo, elImg, elProduct, elQty, elPrice, elTotalPrice, deleteBtnTd)
         return elRow
     }

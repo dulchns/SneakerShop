@@ -2,6 +2,7 @@ import { Router } from './Router.js'
 import { Cart } from './Cart.js'
 import { User } from './User.js'
 import { Notification } from './Notification.js'
+import { createElement } from './app.js'
 
 export class Wishlist {
     static getWishlistData() {
@@ -46,18 +47,13 @@ export class Wishlist {
     }
 
     static renderWishlistPage() {
-        const wishlistContainer = document.createElement('div')
-        wishlistContainer.classList.add('wishlist')
-        const innerContainer = document.createElement('div')
-        innerContainer.classList.add('container')
-    
+        const wishlistContainer = createElement('div', 'wishlist')
+        const innerContainer = document.createElement('div', 'container')
         const wishlistData = Wishlist.getWishlistData()
         
         if(wishlistData.length === 0) {
             new Notification('Your wishlist is empty :(').render(innerContainer, 'static', 'message')
-            const backBtn = document.createElement('button')
-            backBtn.textContent = 'Back to shopping!'
-            backBtn.classList.add('back-btn')
+            const backBtn = createElement('button', 'back-btn', 'Back to shopping!')
             backBtn.addEventListener('click', () => Router.route(this, '/'))
             innerContainer.append(backBtn)
         } else {
@@ -70,29 +66,13 @@ export class Wishlist {
     }
 
     static createWishlistElement(element) {
-        const elContainer = document.createElement('div')
-        elContainer.classList.add('wishlist-item')
-
-        const elImg = document.createElement('img')
-        elImg.classList.add('wishlist-item-image')
-        elImg.src = element.image
-
-        const elTitle = document.createElement('p')
-        elTitle.classList.add('wishlist-item-title')
-        elTitle.textContent = `${element.brand} ${element.model}`
-
-        const elPrice = document.createElement('p')
-        elPrice.classList.add('wishlist-item-price')
-        elPrice.textContent = `$${element.price}`
-
-        const elAddToCartBtn = document.createElement('button')
-        elAddToCartBtn.classList.add('wishlist-tocart-btn')
-        elAddToCartBtn.textContent = 'Add to cart'
+        const elContainer = createElement('div', 'wishlist-item')
+        const elImg = createElement('img', 'wishlist-item-image', null, element.image)
+        const elTitle = createElement('p', 'wishlist-item-title', `${element.brand} ${element.model}`)
+        const elPrice = createElement('p', 'wishlist-item-price', `$${element.price}`)
+        const elAddToCartBtn = createElement('button', 'wishlist-tocart-btn', 'Add to cart')
         elAddToCartBtn.addEventListener('click', () => Cart.addToCart(element))
-
-        const elDelFromWishlistBtn = document.createElement('span')
-        elDelFromWishlistBtn.classList.add('wishlist-del-btn')
-        elDelFromWishlistBtn.textContent = 'Delete'
+        const elDelFromWishlistBtn = createElement('span', 'wishlist-del-btn', 'Delete')
         elDelFromWishlistBtn.addEventListener('click', () => {
             Wishlist.removeFromWishlist(element)
             document.querySelector('.app').innerHTML = ''

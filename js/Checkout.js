@@ -2,22 +2,20 @@ import { Cart } from './Cart.js'
 import { User } from './User.js'
 import { Notification } from './Notification.js'
 import { Router } from './Router.js'
+import { createElement } from './app.js'
 
 export class Checkout {
     static renderCheckoutPage() {
-        const container = document.createElement('div')
-        container.classList.add('checkout-container')
+        const container = createElement('div', 'checkout-container')
         Checkout.renderCheckoutForm(container)
         Checkout.renderOrderInfo(container)
         document.querySelector('.app').append(container)
     }
 
     static renderCheckoutForm(container) {
-        const form = document.createElement('form')
-        form.classList.add('checkout-form')
+        const form = createElement('form', 'checkout-form')
         form.id = 'checkout-form'
-        const title = document.createElement('h2')
-        title.textContent = 'Billing details'
+        const title = document.createElement('h2', null, 'Billing details')
 
         const fieldCreate = (type, placeholder, required) =>  {
             const field = document.createElement('input')
@@ -51,36 +49,28 @@ export class Checkout {
     }
 
     static renderOrderInfo(container) {
-        const info = document.createElement('aside')
-        info.classList.add('order-info')
-        const h2 = document.createElement('h2')
-        h2.textContent = 'Your order'
-        const orderList = document.createElement('ul')
+        const info = createElement('aside', 'order-info')
+        const h2 = createElement('h2', null, 'Your order')
+        const orderList = createElement('ul')
         const orderData = Cart.getCartItems()
         const orderElements = orderData.map(el => {
-            const li = document.createElement('li')
-            li.classList.add('order-item')
-            const text = document.createElement('p')
-            const price = document.createElement('p')
+            const li = createElement('li', 'order-item')
             const item = el[0]
             const qty = el[1]
-            text.textContent = `${item.brand} ${item.model} x ${qty}`
-            price.textContent = `$${item.price * qty}`
+            const text = createElement('p', null, `${item.brand} ${item.model} x ${qty}`)
+            const price = createElement('p', null, `$${item.price * qty}`)
             li.append(text, price)
             return li
         })
 
         orderList.append(...orderElements)
 
-        const finalList = document.createElement('ul')
-        finalList.classList.add('order-final')
+        const finalList = createElement('ul', 'order-final')
 
         const createLi = (text, price) => {
-            const li = document.createElement('li')
-            const textP = document.createElement('p')
-            const priceP = document.createElement('p')
-            textP.textContent = text
-            priceP.textContent = price
+            const li = createElement('li')
+            const textP = createElement('p', null, text)
+            const priceP = createElement('p', null, price)
             li.append(textP, priceP)
             return li
         }
@@ -93,11 +83,9 @@ export class Checkout {
         
         finalList.append(subPrice, deliveryPrice, taxPrice, totalPrice)
 
-        const checkoutBtn = document.createElement('button')
+        const checkoutBtn = createElement('button', 'checkout-btn', 'Place order')
         checkoutBtn.type = 'submit'
         checkoutBtn.setAttribute('form', 'checkout-form')
-        checkoutBtn.classList.add('checkout-btn')
-        checkoutBtn.textContent = 'Place order'
 
         info.append(h2, orderList, finalList, checkoutBtn)
         container.append(info)

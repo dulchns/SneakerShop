@@ -1,4 +1,5 @@
 import { Notification } from "./Notification.js"
+import { createElement } from "./app.js"
 
 export class User {
     constructor(login, fisrtName, password, lastName, email, phone) {
@@ -34,19 +35,16 @@ export class User {
         const allUsers = User.getUsers()
         allUsers.push(new User(...data))
         localStorage.setItem('users', JSON.stringify(allUsers))
-        console.log(data)
         User.login(data[0], data[2])
     }
 
     static renderUserPage(user) {
         const container = document.querySelector('.user-container')
 
-        const panelContainer = document.createElement('div')
+        const panelContainer = createElement('div', 'user-panel')
         panelContainer.append(...User.userPanel())
-        panelContainer.classList.add('user-panel')
-
-        const userCard = document.createElement('div')
-        userCard.classList.add('user-card')
+        
+        const userCard = createElement('div', 'user-card')
         User.userPage(user, null, userCard)
         
         Array.from(panelContainer.children).forEach(btn => {
@@ -81,22 +79,16 @@ export class User {
     static signUpFormRender = () => {
         const container = document.querySelector('.user-container') 
 
-        const signUpContainer = document.createElement('div')
-        signUpContainer.classList.add('sign-up')
-    
-        const signUpTitle = document.createElement('h2')
-        signUpTitle.classList.add('user-form-title')
-        signUpTitle.textContent = 'Create new account'
-    
-        const signUpForm = document.createElement('form')
-        signUpForm.classList.add('sign-up-form')
+        const signUpContainer = createElement('div', 'sign-up')
+        const signUpTitle = createElement('h2', 'user-form-title', 'Create new account')
+        const signUpForm = createElement('form', 'sign-up-form')
         signUpForm.name = 'sign-up-form'
     
         const loginField = User.createFormField('text', 'login-field', 'login-signupform', "Login", true)
         const nameField = User.createFormField('text', 'name-field', 'name-signupform', 'Name', true)
         const passwordField = User.createFormField('password', 'password-field', 'password-signupform', 'Password', true)
     
-        const submitButton = document.createElement('input')
+        const submitButton = createElement('input')
         submitButton.type = "submit"
         submitButton.value = "Sign-up"
     
@@ -118,21 +110,15 @@ export class User {
     static loginFormRender = () => {
         const  container = document.querySelector('.user-container') 
 
-        const loginContainer = document.createElement('div')
-        loginContainer.classList.add('login')
-    
-        const loginTitle = document.createElement('h2')
-        loginTitle.classList.add('user-form-title')
-        loginTitle.textContent = 'Login with existing account'
-    
-        const loginForm = document.createElement('form')
-        loginForm.classList.add('login-form')
+        const loginContainer = createElement('div', 'login')
+        const loginTitle = createElement('h2', 'user-form-title', 'Login with existing account')
+        const loginForm = createElement('form', 'login-form')
         loginForm.name = 'login-form'
     
         const loginField = User.createFormField('text', 'login-field', 'login-loginform', "Login", true)
         const passwordField = User.createFormField('password', 'password-field', 'password-loginform', 'Password', true)
     
-        const submitButton = document.createElement('input')
+        const submitButton = createElement('input')
         submitButton.type = "submit"
         submitButton.value = "Login"
     
@@ -151,10 +137,8 @@ export class User {
 
     static userPanel() {
         const userPanelBtn = (text, page) => {
-            const btn = document.createElement('button')
-            btn.classList.add('user-panel-btn')
+            const btn = createElement('button', 'user-panel-btn', text)
             btn.dataset.render = page
-            btn.textContent = text
             return btn
         }
 
@@ -174,18 +158,10 @@ export class User {
                 }
 
                 const createOrderElement = (order) => {
-                    const orderContainer = document.createElement('div')
-                    orderContainer.classList.add('order-container')
-
-                    const orderID = document.createElement('p')
-                    orderID.textContent = `Order #${order.id}`
-
-                    const orderPrice = document.createElement('p')
-                    orderPrice.textContent = `Total: $${order.bill.total}`
-
-                    const orderDate = document.createElement('p')
-                    orderDate.textContent = order.date
-
+                    const orderContainer = createElement('div', 'order-container')
+                    const orderID = createElement('p', null, `Order #${order.id}`)
+                    const orderPrice = createElement('p', null, `Total: $${order.bill.total}`)
+                    const orderDate = createElement('p', null, order.date)
                     let expanded = null
                     orderContainer.addEventListener('click', (evt) => {
                         if(expanded) {
@@ -214,34 +190,24 @@ export class User {
     }
 
     static expandedOrderHistoryRender(order, container) {
-        const expandedContainer = document.createElement('div')
-        expandedContainer.classList.add('order-history-expanded')
-        const detailsTitle = document.createElement('p')
-        detailsTitle.textContent = 'Details'
-        detailsTitle.classList.add('details-title')
-        const detailsContainer = document.createElement('div')
-        detailsContainer.classList.add('order-details')
-        const dataContainer = document.createElement('ul')
-        dataContainer.classList.add('order-data-list')
-        const shoppingTable = document.createElement('table')
-        shoppingTable.classList.add('order-shopping-table')
-        
+        const expandedContainer = createElement('div', 'order-history-expanded')
+        const detailsTitle = createElement('p', 'details-title', 'Details')
+        const detailsContainer = createElement('div', 'order-details')
+        const dataContainer = createElement('ul', 'order-data-list')
+        const shoppingTable = createElement('table', 'order-shopping-table')
         const data = order.data
         const shoppings = order.shoppings
         const bill = order.bill
 
         Object.entries(data).forEach(el => {
-            const li = document.createElement('li')
-            li.textContent = el.join(': ')
+            const li = createElement('li', null, el.join(': '))
             dataContainer.append(li)
         })
         
-        const tableHeader = document.createElement('tr')
-        tableHeader.classList.add('order-table-header')
+        const tableHeader = createElement('tr', 'order-table-header')
         
         const createTableCell = (type, val, className = null) => {
-            const cell = document.createElement(type)
-            cell.textContent = val
+            const cell = createElement(type, null, val)
             if(className) cell.classList.add(className)
             return cell
         }
@@ -287,26 +253,14 @@ export class User {
     }
 
     static profileRender(user) {
-        const profileContainer = document.createElement('div')
-        profileContainer.classList.add('profile-container')
-
-        const userLogin = document.createElement('p')
-        userLogin.textContent = `Login: ${user.login}`
-        
-        const userFirstName = document.createElement('p')
-        userFirstName.textContent = `First name: ${user.fisrtName}`
-
-        const userLastName = document.createElement('p')
-        userLastName.textContent = `Last name: ${user.lastName || 'Not specified'}`
-        
-        const userEmail = document.createElement('p')
-        userEmail.textContent =  `Email: ${user.email || 'Not specified'}`
-
-        const userPhone = document.createElement('p')
-        userPhone.textContent =  `Phone: ${user.phone || 'Not specified'}`
+        const profileContainer = createElement('div', 'profile-container')
+        const userLogin = createElement('p', null, `Login: ${user.login}`)
+        const userFirstName = createElement('p', null, `First name: ${user.fisrtName}`)
+        const userLastName = createElement('p', null, `Last name: ${user.lastName || 'Not specified'}`)
+        const userEmail = createElement('p', null, `Email: ${user.email || 'Not specified'}`)
+        const userPhone = createElement('p', null, `Phone: ${user.phone || 'Not specified'}`)
 
         profileContainer.append(userLogin, userFirstName, userLastName, userEmail, userPhone)
-
         return profileContainer
     }
 }

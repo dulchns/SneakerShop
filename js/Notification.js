@@ -1,16 +1,13 @@
+import { createElement } from "./app.js"
 export class Notification {
     constructor(message) {
         this.message = message
     }
 
     render(container, type, style) {
-        const notification = document.createElement('div')
-        notification.classList.add('notification')
-
-        const notificationImg = document.createElement('img')
-
-        const notificationText = document.createElement('p')
-        notificationText.textContent = this.message 
+        const notification = createElement('div', 'notification')
+        const notificationImg = createElement('img')
+        const notificationText = createElement('p', null, this.message )
         
         switch(style) {
             case 'message':
