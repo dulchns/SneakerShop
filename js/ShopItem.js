@@ -43,8 +43,8 @@ export class ShopItem {
 
         wishlistContainer.append(addToWishlistBtn)
         
-        cardImage.addEventListener('click', () => Router.route(this, `/catalog?id=${item.id}`))
-        cardTitle.addEventListener('click', () => Router.route(this, `/catalog?id=${item.id}`))
+        cardImage.addEventListener('click', () => new Router(null, `/catalog?id=${item.id}`).route())
+        cardTitle.addEventListener('click', () => new Router(null, `/catalog?id=${item.id}`).route())
         addToCartBtn.addEventListener('click', () => Cart.addToCart(item))
         addToWishlistBtn.addEventListener('click', () => {
             if(!Wishlist.getWishlistData().find(el => el.id === item.id)) {

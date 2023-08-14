@@ -17,7 +17,7 @@ export class Cart {
             new Notification('Cart is empty :(').render(container, 'static', 'message')
 
             const backBtn = createElement('button', 'back-btn', 'Back to shopping!')
-            backBtn.addEventListener('click', () => Router.route(this, '/'))
+            backBtn.addEventListener('click', () => new Router(null, '/').route())
             container.append(backBtn)
             document.querySelector('.app').append(container)
             return
@@ -45,7 +45,7 @@ export class Cart {
             const delivery = 25
             const total = subTotal + taxSum + delivery
             localStorage.setItem('bill', JSON.stringify({subTotal, tax, taxSum, delivery, total}))
-            Router.route(this, '/cart#checkout')
+            new Router(null, '/cart#checkout').route()
         })
 
         const totalPrice = createElement('p', 'total-price', `Total price: $${Cart.total()}`)

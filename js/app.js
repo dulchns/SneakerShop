@@ -19,6 +19,6 @@ Router.start()
 document.querySelectorAll('a').forEach(link => {
     link.addEventListener('click', (evt) => {
         evt.preventDefault()
-        Router.route(link)
+        new Router(link).route()
     })
 })

@@ -54,7 +54,7 @@ export class Wishlist {
         if(wishlistData.length === 0) {
             new Notification('Your wishlist is empty :(').render(innerContainer, 'static', 'message')
             const backBtn = createElement('button', 'back-btn', 'Back to shopping!')
-            backBtn.addEventListener('click', () => Router.route(this, '/'))
+            backBtn.addEventListener('click', () => new Router(null, '/').route())
             innerContainer.append(backBtn)
         } else {
             const containerElements = wishlistData.map(el => Wishlist.createWishlistElement(el))

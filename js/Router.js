@@ -5,16 +5,21 @@ import { Wishlist } from "./Wishlist.js"
 import { Checkout } from "./Checkout.js"
 
 export class Router {
-    static start() {
-        JSON.parse(localStorage.getItem('items')).forEach(item => ShopItem.renderItemCard(item))
+    constructor(target, link = target.href) {
+        this.target = target
+        this.link = link
     }
 
-    static route(target, link = target.href) {
-        window.history.pushState(null, null, link)
+    route() {
+        window.history.pushState(null, null, this.link)
         document.querySelector('.app').innerHTML = ''
         Router.getPageData(location.pathname)
     }
-
+    
+    static start() {
+        JSON.parse(localStorage.getItem('items')).forEach(item => ShopItem.renderItemCard(item))
+    }
+    
     static getPageData(page) {
         switch(page) {
             case '/': 

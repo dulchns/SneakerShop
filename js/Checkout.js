@@ -43,7 +43,7 @@ export class Checkout {
             evt.preventDefault()
             Object.values(evt.target.elements).forEach(el => el.disabled = true)
             Checkout.completeOrder()
-            setTimeout(() => Router.route(this, '/'), 1000)
+            setTimeout(() => new Router(null, '/').route(), 1000)
         })
         container.append(form)
     }
