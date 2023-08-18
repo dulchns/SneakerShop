@@ -1,5 +1,6 @@
 import { Router } from "./Router.js";
 import { data } from "./db.js"
+import { Store } from "./Store.js";
 
 export const createElement = (elementName, className = null, text = null, src = null) => {
     const element = document.createElement(elementName)
@@ -9,9 +10,10 @@ export const createElement = (elementName, className = null, text = null, src = 
     return element
 }
 
-const db = localStorage.getItem('items')
-if(!db) {
-    localStorage.setItem('items', JSON.stringify(data))
+const itemStore = new Store('items')
+const db = itemStore.getData()
+if(!db.length) {
+    itemStore.setData(data)
 }
 
 Router.start()

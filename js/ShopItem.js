@@ -4,7 +4,7 @@ import { Wishlist } from "./Wishlist.js"
 import { createElement } from "./app.js"
 
 export class ShopItem {
-    constructor({ id, brand, model, size, sex, price, image }) {
+    constructor({ id, brand, model, size, sex, price, image, description }) {
         this.id = id
         this.brand = brand
         this.model = model 
@@ -12,9 +12,10 @@ export class ShopItem {
         this.sex = sex
         this.price = price
         this.image = image
+        this.description = description
     }
 
-    static renderItemCard(item) {
+    renderItemCard() {
         let shopContainer = document.querySelector('.shop-items')
         if(!shopContainer) {
             shopContainer = createElement('div', 'shop-items')
@@ -22,10 +23,10 @@ export class ShopItem {
         }
         
         const card = createElement('div', 'item-card')
-        const cardImage = createElement('img', 'item-image', null, item.image)
+        const cardImage = createElement('img', 'item-image', null, this.image)
         const titleContainer = createElement('div', 'title-container')
-        const cardTitle = createElement('p', 'item-title', `${item.brand} ${item.model}`)
-        const cardPrice = createElement('p', 'item-price', `$${item.price}`)
+        const cardTitle = createElement('p', 'item-title', `${this.brand} ${this.model}`)
+        const cardPrice = createElement('p', 'item-price', `$${this.price}`)
         const btnContainer = createElement('div', 'btn-container')
         const addToCartContainer = createElement('div', 'add-to-cart')     
         const addToCartBtn = createElement('img', null, null, '/images/add-to-cart.svg')
@@ -37,21 +38,22 @@ export class ShopItem {
 
         const wishlistContainer = createElement('div', 'add-to-wishlist')
         const addToWishlistBtn = createElement('img')
+        const wishlist = new Wishlist()
 
-        if(Wishlist.getWishlistData().find(el => el.id === item.id)) addToWishlistBtn.src = '/images/in-wishlist.svg'
+        if(wishlist.store.getData().find(el => el.id === this.id)) addToWishlistBtn.src = '/images/in-wishlist.svg'
         else addToWishlistBtn.src = '/images/non-wishlist.svg'
 
         wishlistContainer.append(addToWishlistBtn)
         
-        cardImage.addEventListener('click', () => new Router(null, `/catalog?id=${item.id}`).route())
-        cardTitle.addEventListener('click', () => new Router(null, `/catalog?id=${item.id}`).route())
-        addToCartBtn.addEventListener('click', () => Cart.addToCart(item))
+        cardImage.addEventListener('click', () => new Router(null, `/catalog?id=${this.id}`).route())
+        cardTitle.addEventListener('click', () => new Router(null, `/catalog?id=${this.id}`).route())
+        addToCartBtn.addEventListener('click', () => new Cart().addToCart(this))
         addToWishlistBtn.addEventListener('click', () => {
-            if(!Wishlist.getWishlistData().find(el => el.id === item.id)) {
-                Wishlist.addToWishlist(item)
+            if(!wishlist.store.getData().find(el => el.id === this.id)) {
+                wishlist.addToWishlist(this)
                 addToWishlistBtn.src = '/images/in-wishlist.svg'
             } else {
-                Wishlist.removeFromWishlist(item)
+                wishlist.removeFromWishlist(this)
                 addToWishlistBtn.src = '/images/non-wishlist.svg'
             }
         
@@ -67,34 +69,35 @@ export class ShopItem {
         return card
     }
 
-    static renderItemPage(item) {
+    renderItemPage() {
         const container = createElement('div', 'shop-item')
 
-        if(!item) {
+        if(!this) {
             container.innerHTML = 'Product not found!'
             return
         }
 
         const imgBox = createElement('div','img-item-box')
-        const image = createElement('img', null, null, item.image)
+        const image = createElement('img', null, null, this.image)
         imgBox.append(image)
         const aboutBox = createElement('div', 'about-item-box')
-        const title = createElement('h2', null, `${item.brand} ${item.model}`)
-        const price = createElement('p', null, `$${item.price}`)
-        const sex = createElement('p', null, `${item.for}\`s Shoes`)
-        const description = createElement('p', null, item.description)
+        const title = createElement('h2', null, `${this.brand} ${this.model}`)
+        const price = createElement('p', null, `$${this.price}`)
+        const sex = createElement('p', null, `${this.sex}\`s Shoes`)
+        const description = createElement('p', null, this.description)
         const btnBox = createElement('div', 'btn-box')
         const addToCartBtn = createElement('button', 'tocart-item', 'Add to cart')
         const addToCompareBtn = createElement('button', 'tocompare-item', 'Add to compare')
         const toWishListBtn = createElement('button', 'towishlist-item', 'To wishlist')
-        addToCartBtn.addEventListener('click', () => Cart.addToCart(item))
+        addToCartBtn.addEventListener('click', () => new Cart().addToCart(this))
+        const wishlist = new Wishlist()
         toWishListBtn.addEventListener('click', () => {
-            if(!Wishlist.getWishlistData().find(el => el.id === item.id)) {
-                Wishlist.addToWishlist(item)
-                addToWishlistBtn.src = '/images/in-wishlist.svg'
+            if(!wishlist.store.getData().find(el => el.id === this.id)) {
+                wishlist.addToWishlist(this)
+                toWishListBtn.src = '/images/in-wishlist.svg'
             } else {
-                Wishlist.removeFromWishlist(item)
-                addToWishlistBtn.src = '/images/non-wishlist.svg'
+                wishlist.removeFromWishlist(this)
+                toWishListBtn.src = '/images/non-wishlist.svg'
             }
         })
 

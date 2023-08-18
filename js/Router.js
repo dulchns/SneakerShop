@@ -3,6 +3,7 @@ import { ShopItem } from "./ShopItem.js"
 import { Cart } from "./Cart.js"
 import { Wishlist } from "./Wishlist.js"
 import { Checkout } from "./Checkout.js"
+import { Store } from "./Store.js"
 
 export class Router {
     constructor(target, link = target.href) {
@@ -15,9 +16,9 @@ export class Router {
         document.querySelector('.app').innerHTML = ''
         Router.getPageData(location.pathname)
     }
-    
+
     static start() {
-        JSON.parse(localStorage.getItem('items')).forEach(item => ShopItem.renderItemCard(item))
+        new Store('items').getData().forEach(item => new ShopItem(item).renderItemCard())
     }
     
     static getPageData(page) {
@@ -26,35 +27,35 @@ export class Router {
                 Router.start()
             break
             case '/wishlist': 
-                Wishlist.renderWishlistPage()
+                new Wishlist().renderWishlistPage()
             break
             case '/user': 
-                const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'))
+                const loggedUser = new Store('loggedInUser').getData()
                 
                 const container = document.createElement('div')
                 container.classList.add('user-container')
                 document.querySelector('.app').append(container)
                 
-                if(loggedUser) {
-                     User.renderUserPage(loggedUser)
+                if(loggedUser.login) {
+                    new User(loggedUser).renderUserPage()
                 } else {
                     User.signUpFormRender()
                     User.loginFormRender()
                 }
             break
             case '/cart': 
-                if(location.hash) Checkout.renderCheckoutPage()
-                else Cart.render()
+                if(location.hash) new Checkout().renderCheckoutPage()
+                else new Cart().render()
             break
             case '/catalog': 
+                const store = new Store('items')
                 if(location.search) {
                     const itemId = location.search.slice(4)
-                    const item = JSON.parse(localStorage.getItem('items')).find(item => item.id === itemId)
-                    ShopItem.renderItemPage(item)
+                    const item = store.getData().find(item => item.id === itemId)
+                    new ShopItem(item).renderItemPage()
                 } else if(location.hash) {
-                    JSON.parse(localStorage.getItem('items'))
-                        .filter(item => item.for.toLowerCase() === location.hash.slice(1))
-                        .forEach(item => ShopItem.renderItemCard(item))   
+                    store.getData().filter(item => item.sex.toLowerCase() === location.hash.slice(1))
+                                   .forEach(item => new ShopItem(item).renderItemCard())   
                 }
             break
             case '/about-us':

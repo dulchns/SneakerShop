@@ -1,17 +1,16 @@
 import { Router } from "./Router.js"
 import { Notification } from "./Notification.js"
 import { createElement } from "./app.js"
+import { Store } from "./Store.js"
 
 export class Cart {
-    static getCartItems() {
-        const cartItems = localStorage.getItem('itemsInCart')
-        if(cartItems) return JSON.parse(cartItems)
-        else return []
+    constructor() {
+        this.store = new Store('itemsInCart')
     }
 
-    static render() {
+    render() {
         const container = createElement('div', 'cart')
-        const cartItems = Cart.getCartItems()
+        const cartItems = this.store.getData()
 
         if(cartItems.length === 0) {
             new Notification('Cart is empty :(').render(container, 'static', 'message')
@@ -32,28 +31,28 @@ export class Cart {
         const thPrice = createElement('th', null, 'Price')
         const thTotal = createElement('th', null, 'Total')
         thRow.append(thNo, thProduct, thQty, thPrice, thTotal)
-        const elements = cartItems.map((el, index) => Cart.createCartElement(el, index + 1))
+        const elements = cartItems.map((el, index) => this.createCartElement(el, index + 1))
         table.append(thRow, ...elements)
 
         const cartToOrderContainer = createElement('div', 'cart-to-order')
         const purchaseBtn = createElement('button', 'purchase-btn', 'Proceed to purchase')
 
         purchaseBtn.addEventListener('click', () => {
-            const subTotal = Cart.total()
+            const subTotal = this.total()
             const tax = 0
             const taxSum = subTotal * tax
             const delivery = 25
             const total = subTotal + taxSum + delivery
-            localStorage.setItem('bill', JSON.stringify({subTotal, tax, taxSum, delivery, total}))
+            new Store('bill').setData({subTotal, tax, taxSum, delivery, total})
             new Router(null, '/cart#checkout').route()
         })
 
-        const totalPrice = createElement('p', 'total-price', `Total price: $${Cart.total()}`)
+        const totalPrice = createElement('p', 'total-price', `Total price: $${this.total()}`)
         const clearAllCartBtn = createElement('p', 'clear-cart-btn', 'Clear cart')
         clearAllCartBtn.addEventListener('click', () => {
-            Cart.clearAll()
+            this.clearAll()
             document.querySelector('.app').innerHTML = ''
-            Cart.render()
+            this.render()
         })
 
         cartToOrderContainer.append(totalPrice, purchaseBtn)
@@ -61,7 +60,7 @@ export class Cart {
         document.querySelector('.app').append(container)
     }
 
-    static createCartElement(item, index) {
+    createCartElement(item, index) {
         const { brand, model, price, image } = item[0]
         const elRow = createElement('tr')
         const elNo = createElement('td', 'no-data', `${index}`)
@@ -80,16 +79,16 @@ export class Cart {
         elQtyInput.readOnly = true
         elQtyMinusBtn.addEventListener('click', () => {
             if(+elQtyInput.value === 0) return
-            const getCartItems = Cart.getCartItems().filter(el => el[0].id !== item[0].id)
+            const getCartItems = this.store.getData().filter(el => el[0].id !== item[0].id)
             const newValue = --elQtyInput.value
             getCartItems.push([item[0], newValue])
             localStorage.setItem('itemsInCart', JSON.stringify(getCartItems))
             elTotalPrice.textContent = `$${price * elQtyInput.value}`
-            document.querySelector('.total-price').textContent = `Total price: $${Cart.total()}`
+            document.querySelector('.total-price').textContent = `Total price: $${this.total()}`
         })
         elQtyPlusBtn.addEventListener('click', () => {
             if(+elQtyInput.value === 5) return
-            const getCartItems = Cart.getCartItems().filter(el => el[0].id !== item[0].id)
+            const getCartItems = this.store.getData().filter(el => el[0].id !== item[0].id)
             const newValue = ++elQtyInput.value
             getCartItems.push([item[0], newValue])
             localStorage.setItem('itemsInCart', JSON.stringify(getCartItems))
@@ -100,9 +99,9 @@ export class Cart {
         const deleteBtnTd = createElement('td', 'delete-data')
         const deleteBtn = createElement('span', 'delete-from-cart-btn', 'Delete')
         deleteBtn.addEventListener('click', () => {
-            Cart.removeFromCart(item)
+            this.removeFromCart(item)
             document.querySelector('.app').innerHTML = ''
-            Cart.render()
+            this.render()
         })
 
         deleteBtnTd.append(deleteBtn)
@@ -111,8 +110,8 @@ export class Cart {
         return elRow
     }
 
-    static addToCart(item) {
-        let getCartItems = Cart.getCartItems()
+    addToCart(item) {
+        let getCartItems = this.store.getData()
         let includedItem = getCartItems.find(el => el[0].id === item.id)
     
         if(includedItem && includedItem[1] === 5) return
@@ -122,22 +121,22 @@ export class Cart {
         if(includedItem) getCartItems.push([item, ++includedItem[1]])
         else getCartItems.push([item, 1])
 
-        localStorage.setItem('itemsInCart', JSON.stringify(getCartItems))
+        this.store.setData(getCartItems)
     }
 
-    static removeFromCart(item) {
-        let cartItems = Cart.getCartItems()
+    removeFromCart(item) {
+        let cartItems = this.store.getData()
         cartItems = cartItems.filter(el => el[0].id !== item[0].id)
         
-        if(!cartItems.length) localStorage.removeItem('itemsInCart')
-        else localStorage.setItem('itemsInCart', JSON.stringify(cartItems))
+        if(!cartItems.length) this.store.remove()
+        else this.store.setData(cartItems)
     }
 
-    static total() {
-        return Cart.getCartItems().reduce((curr, prev) => curr + (prev[0].price * prev[1]), 0)
+    total() {
+        return this.store.getData().reduce((curr, prev) => curr + (prev[0].price * prev[1]), 0)
     }
 
-    static clearAll() {
-        localStorage.removeItem('itemsInCart')
+    clearAll() {
+        this.store.remove()
     }
 }

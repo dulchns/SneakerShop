@@ -2,54 +2,57 @@ import { Router } from './Router.js'
 import { Cart } from './Cart.js'
 import { User } from './User.js'
 import { Notification } from './Notification.js'
+import { Store } from './Store.js'
 import { createElement } from './app.js'
 
 export class Wishlist {
-    static getWishlistData() {
-            const wishlistData = JSON.parse(localStorage.getItem('wishlist'))
-            if(wishlistData) return wishlistData
-            else return []
+    constructor() {
+        this.store = new Store('wishlist')
     }
-
-    static addToWishlist(item) {
-        const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'))
-        let wishlist = Wishlist.getWishlistData()
+    
+    addToWishlist(item) {
+        const loggedUserStore = new Store('loggedInUser')
+        const loggedUser = loggedUserStore.getData()
+        let wishlist = this.store.getData()
         wishlist.push(item)
 
-        if(loggedUser) {
+        if(loggedUser.login) {
+            const userStore = new Store('users')
             loggedUser.wishlist = wishlist
-            let users = User.getUsers()
+            let users = userStore.getData()
             users = users.filter(el => el.id !== loggedUser.id)
             users.push(loggedUser)
-            localStorage.setItem('loggedInUser', JSON.stringify(loggedUser))
-            localStorage.setItem('users', JSON.stringify(users))
+            loggedUserStore.setData(loggedUser)
+            userStore.setData(users)
         }
         
         localStorage.setItem('wishlist', JSON.stringify(wishlist))
     }
 
-    static removeFromWishlist(item) {
-        let wishlist = Wishlist.getWishlistData()
+    removeFromWishlist(item) {
+        let wishlist = this.store.getData()
         wishlist = wishlist.filter(el => el.id !== item.id)
-        const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'))
+        const loggedUserStore = new Store('loggedInUser')
+        const loggedUser = loggedUserStore.getData()
 
-        if(!wishlist.length) localStorage.removeItem('wishlist')
-        else localStorage.setItem('wishlist', JSON.stringify(wishlist))
+        if(!wishlist.length) this.store.remove()
+        else this.store.setData(wishlist)
 
-        if(loggedUser) {
+        if(loggedUser.login) {
+            const userStore = new Store('users')
             loggedUser.wishlist = wishlist
-            let users = User.getUsers()
+            let users = userStore.getData()
             users = users.filter(el => el.id !== loggedUser.id)
             users.push(loggedUser)
-            localStorage.setItem('loggedInUser', JSON.stringify(loggedUser))
-            localStorage.setItem('users', JSON.stringify(users))
+            loggedUserStore.setData(loggedUser)
+            userStore.setData(users)
         }
     }
 
-    static renderWishlistPage() {
+    renderWishlistPage() {
         const wishlistContainer = createElement('div', 'wishlist')
-        const innerContainer = document.createElement('div', 'container')
-        const wishlistData = Wishlist.getWishlistData()
+        const innerContainer = createElement('div', 'container')
+        const wishlistData = this.store.getData()
         
         if(wishlistData.length === 0) {
             new Notification('Your wishlist is empty :(').render(innerContainer, 'static', 'message')
@@ -57,7 +60,7 @@ export class Wishlist {
             backBtn.addEventListener('click', () => new Router(null, '/').route())
             innerContainer.append(backBtn)
         } else {
-            const containerElements = wishlistData.map(el => Wishlist.createWishlistElement(el))
+            const containerElements = wishlistData.map(el => this.createWishlistElement(el))
             innerContainer.append(...containerElements)
         }
 
@@ -65,18 +68,18 @@ export class Wishlist {
         document.querySelector('.app').append(wishlistContainer)
     }
 
-    static createWishlistElement(element) {
+    createWishlistElement(element) {
         const elContainer = createElement('div', 'wishlist-item')
         const elImg = createElement('img', 'wishlist-item-image', null, element.image)
         const elTitle = createElement('p', 'wishlist-item-title', `${element.brand} ${element.model}`)
         const elPrice = createElement('p', 'wishlist-item-price', `$${element.price}`)
         const elAddToCartBtn = createElement('button', 'wishlist-tocart-btn', 'Add to cart')
-        elAddToCartBtn.addEventListener('click', () => Cart.addToCart(element))
+        elAddToCartBtn.addEventListener('click', () => new Cart().addToCart(element))
         const elDelFromWishlistBtn = createElement('span', 'wishlist-del-btn', 'Delete')
         elDelFromWishlistBtn.addEventListener('click', () => {
-            Wishlist.removeFromWishlist(element)
+            this.removeFromWishlist(element)
             document.querySelector('.app').innerHTML = ''
-            Wishlist.renderWishlistPage()
+            this.renderWishlistPage()
         })
 
         elContainer.append(elImg, elTitle, elPrice, elAddToCartBtn, elDelFromWishlistBtn)

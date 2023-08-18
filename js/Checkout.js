@@ -2,17 +2,23 @@ import { Cart } from './Cart.js'
 import { User } from './User.js'
 import { Notification } from './Notification.js'
 import { Router } from './Router.js'
+import { Store } from './Store.js'
 import { createElement } from './app.js'
 
 export class Checkout {
-    static renderCheckoutPage() {
+    constructor() {
+        this.bill = new Store('bill').getData()
+        this.cart = new Store('itemsInCart').getData()
+    }
+
+    renderCheckoutPage() {
         const container = createElement('div', 'checkout-container')
-        Checkout.renderCheckoutForm(container)
-        Checkout.renderOrderInfo(container)
+        this.renderCheckoutForm(container)
+        this.renderOrderInfo(container)
         document.querySelector('.app').append(container)
     }
 
-    static renderCheckoutForm(container) {
+    renderCheckoutForm(container) {
         const form = createElement('form', 'checkout-form')
         form.id = 'checkout-form'
         const title = document.createElement('h2', null, 'Billing details')
@@ -42,17 +48,17 @@ export class Checkout {
         form.addEventListener('submit', (evt) => {
             evt.preventDefault()
             Object.values(evt.target.elements).forEach(el => el.disabled = true)
-            Checkout.completeOrder()
+            this.completeOrder()
             setTimeout(() => new Router(null, '/').route(), 1000)
         })
         container.append(form)
     }
 
-    static renderOrderInfo(container) {
+    renderOrderInfo(container) {
         const info = createElement('aside', 'order-info')
         const h2 = createElement('h2', null, 'Your order')
         const orderList = createElement('ul')
-        const orderData = Cart.getCartItems()
+        const orderData = this.cart
         const orderElements = orderData.map(el => {
             const li = createElement('li', 'order-item')
             const item = el[0]
@@ -91,7 +97,7 @@ export class Checkout {
         container.append(info)
     }
 
-    static completeOrder() {
+    completeOrder() {
         const form = document.querySelector('.checkout-form')
         const billingData = Object.values(form.elements).reduce((obj, prop) => {
             if(prop.placeholder) obj[prop.placeholder] = prop.value
@@ -99,12 +105,12 @@ export class Checkout {
         }, {})
 
         const generateOrderId = () => {
-            const lastOrder = Number(JSON.parse(localStorage.getItem('lastorder'))?.id || 0)
+            const lastOrder = Number(new Store('lastorder').getData()?.id || 0)
             let newId = (lastOrder + 1).toString()
             return newId.padStart(7 - newId.length, '0')
         } 
 
-        const orderData = {'shoppings': Cart.getCartItems(), 'bill': JSON.parse(localStorage.getItem('bill'))}
+        const orderData = {'shoppings': this.cart, 'bill': this.bill}
 
         const date = new Date()
         const dateCorrector = (val) => {
@@ -121,16 +127,17 @@ export class Checkout {
                                 'date': `${hours}:${minutes} ${day}.${month}.${year}`,
                                  ...orderData, 
                                  'data': billingData }
-        const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'))
-        const users = User.getUsers().filter(user => user.login !== loggedUser.login)
-        localStorage.setItem('lastorder', JSON.stringify(completeOrder))
+        const loggedUserStore = new Store('loggedInUser')
+        const userStore = new Store('users')
+        const loggedUser = loggedUserStore.getData()
+        const users = userStore.getData().filter(user => user.login !== loggedUser.login)
         loggedUser.orders.push(completeOrder)
         users.push(loggedUser)
-        localStorage.removeItem('bill')
-        localStorage.setItem('loggedInUser', JSON.stringify(loggedUser))
-        localStorage.setItem('users', JSON.stringify(users))
-        
-        Cart.clearAll()
+        loggedUserStore.setData(loggedUser)
+        new Store('lastorder').setData(completeOrder)
+        new Store('bill').remove()
+        userStore.setData(users)
+        new Cart().clearAll()
         new Notification('Order successful!').render(document.body, 'pop', 'success')
     }
 }

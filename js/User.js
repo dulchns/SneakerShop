@@ -1,11 +1,12 @@
 import { Notification } from "./Notification.js"
 import { createElement } from "./app.js"
+import { Store } from "./Store.js"
 
 export class User {
-    constructor(login, fisrtName, password, lastName, email, phone) {
+    constructor({login, firstName, password, lastName, email, phone}) {
         this.login = login
         this.password = password
-        this.fisrtName = fisrtName
+        this.firstName = firstName
         this.lastName = lastName
         this.email = email
         this.phone = phone
@@ -13,56 +14,24 @@ export class User {
         this.orders = []
     }
 
-    static getUsers() {
-        const allUsers = localStorage.getItem('users')
-        if(allUsers) return JSON.parse(allUsers)
-        else return []
-    }
-
     static login(login, password) {
-        const allUsers = User.getUsers()
+        const allUsers = new Store('users').getData()
         const loginValidate = allUsers.find(user => user.login === login)
     
         if(loginValidate && loginValidate.password === password) {
-            localStorage.setItem('loggedInUser', JSON.stringify(loginValidate))
+            new Store('loggedInUser').setData(loginValidate)
+            new Store('wishlist').setData(loginValidate.wishlist)
             document.querySelector('.user-container').innerHTML = ''
-            localStorage.setItem('wishlist', JSON.stringify(loginValidate.wishlist))
-            User.renderUserPage(loginValidate)
+            new User(loginValidate).renderUserPage()
         }
     }
 
-    static signUp(...data) {
-        const allUsers = User.getUsers()
-        allUsers.push(new User(...data))
-        localStorage.setItem('users', JSON.stringify(allUsers))
-        User.login(data[0], data[2])
-    }
-
-    static renderUserPage(user) {
-        const container = document.querySelector('.user-container')
-
-        const panelContainer = createElement('div', 'user-panel')
-        panelContainer.append(...User.userPanel())
-        
-        const userCard = createElement('div', 'user-card')
-        User.userPage(user, null, userCard)
-        
-        Array.from(panelContainer.children).forEach(btn => {
-            btn.addEventListener('click', (evt) => {
-                userCard.innerHTML = ''
-                if(evt.target.dataset.render !== 'log-out') {
-                    User.userPage(user, evt.target.dataset.render, userCard)
-                } else {
-                    localStorage.removeItem('loggedInUser')
-                    localStorage.removeItem('wishlist')
-                    document.querySelector('.user-container').innerHTML = ''
-                    User.signUpFormRender()
-                    User.loginFormRender()
-                }
-            })
-        })
-
-        container.append(panelContainer, userCard) 
+    static signUp(data) {
+        const allUsersStore = new Store('users')
+        const allUsers = allUsersStore.getData()
+        allUsers.push(new User(data))
+        allUsersStore.setData(allUsers)
+        User.login(data.login, data.password)
     }
 
     static createFormField = (type, name, id, placeholder, required) => {
@@ -84,9 +53,9 @@ export class User {
         const signUpForm = createElement('form', 'sign-up-form')
         signUpForm.name = 'sign-up-form'
     
-        const loginField = User.createFormField('text', 'login-field', 'login-signupform', "Login", true)
-        const nameField = User.createFormField('text', 'name-field', 'name-signupform', 'Name', true)
-        const passwordField = User.createFormField('password', 'password-field', 'password-signupform', 'Password', true)
+        const loginField = User.createFormField('text', 'login', 'login-signupform', "Login", true)
+        const nameField = User.createFormField('text', 'firstName', 'name-signupform', 'Name', true)
+        const passwordField = User.createFormField('password', 'password', 'password-signupform', 'Password', true)
     
         const submitButton = createElement('input')
         submitButton.type = "submit"
@@ -98,10 +67,13 @@ export class User {
     
         signUpForm.addEventListener('submit', (evt) => {
             evt.preventDefault() 
-            const users = User.getUsers()
-            const userData = Object.values(signUpForm.elements).slice(0,3).map(el => el.value)
-            if(!users.find(el => el.login === userData[0])) {
-                User.signUp(...userData)
+            const users = new Store('users').getData()
+            const userData = Object.values(signUpForm.elements).slice(0,3).reduce((res, prev) => {
+                res[prev.name] = prev.value
+                return res
+            }, {})
+            if(!users.find(el => el.login === userData.login)) {
+                User.signUp(userData)
                 new Notification('Signed up successfully!').render(document.body, 'pop', 'success')
             } else new Notification('User already registered!').render(document.body, 'pop', 'error')
         })
@@ -115,8 +87,8 @@ export class User {
         const loginForm = createElement('form', 'login-form')
         loginForm.name = 'login-form'
     
-        const loginField = User.createFormField('text', 'login-field', 'login-loginform', "Login", true)
-        const passwordField = User.createFormField('password', 'password-field', 'password-loginform', 'Password', true)
+        const loginField = User.createFormField('text', 'login', 'login-loginform', "Login", true)
+        const passwordField = User.createFormField('password', 'password', 'password-loginform', 'Password', true)
     
         const submitButton = createElement('input')
         submitButton.type = "submit"
@@ -130,9 +102,36 @@ export class User {
             evt.preventDefault()
             const userData = Object.values(loginForm.elements).slice(0,2).map(el => el.value)
             User.login(...userData)
-            if(localStorage.getItem('loggedInUser')) new Notification('Login successful!').render(document.body, 'pop', 'success')
+            if(new Store('loggedInUser').getData()) new Notification('Login successful!').render(document.body, 'pop', 'success')
             else new Notification('Incorrect username or password!').render(document.body, 'pop', 'error')
         })
+    }
+
+    renderUserPage() {
+        const container = document.querySelector('.user-container')
+
+        const panelContainer = createElement('div', 'user-panel')
+        panelContainer.append(...User.userPanel())
+        
+        const userCard = createElement('div', 'user-card')
+        this.userPage(null, userCard)
+        
+        Array.from(panelContainer.children).forEach(btn => {
+            btn.addEventListener('click', (evt) => {
+                userCard.innerHTML = ''
+                if(evt.target.dataset.render !== 'log-out') {
+                    this.userPage(evt.target.dataset.render, userCard)
+                } else {
+                    new Store('loggedInUser').remove()
+                    new Store('wishlist').remove()
+                    document.querySelector('.user-container').innerHTML = ''
+                    User.signUpFormRender()
+                    User.loginFormRender()
+                }
+            })
+        })
+
+        container.append(panelContainer, userCard) 
     }
 
     static userPanel() {
@@ -149,10 +148,10 @@ export class User {
         return [profilePageBtn, ordersPageBtn, logOutBtn]
     }
 
-    static userPage(user, page, container) {
+    userPage(page, container) {
         switch(page) {
             case 'orders':
-                const orders = JSON.parse(localStorage.getItem('loggedInUser')).orders.reverse()
+                const orders = new Store('loggedInUser').getData().orders.reverse()
                 if(!orders.length) {
                     new Notification('Order history is empty!').render(container, 'static', 'message')
                 }
@@ -184,9 +183,21 @@ export class User {
                 container.append(...orders.map(order => createOrderElement(order)))
             break
             default:
-                container.append(User.profileRender(user))
+                container.append(this.profileRender())
             break
         }
+    }
+
+    profileRender() {
+        const profileContainer = createElement('div', 'profile-container')
+        const userLogin = createElement('p', null, `Login: ${this.login}`)
+        const userFirstName = createElement('p', null, `First name: ${this.firstName}`)
+        const userLastName = createElement('p', null, `Last name: ${this.lastName || 'Not specified'}`)
+        const userEmail = createElement('p', null, `Email: ${this.email || 'Not specified'}`)
+        const userPhone = createElement('p', null, `Phone: ${this.phone || 'Not specified'}`)
+
+        profileContainer.append(userLogin, userFirstName, userLastName, userEmail, userPhone)
+        return profileContainer
     }
 
     static expandedOrderHistoryRender(order, container) {
@@ -250,17 +261,5 @@ export class User {
         expandedContainer.append(detailsContainer, shoppingTable)
         container.after(expandedContainer)
         return expandedContainer
-    }
-
-    static profileRender(user) {
-        const profileContainer = createElement('div', 'profile-container')
-        const userLogin = createElement('p', null, `Login: ${user.login}`)
-        const userFirstName = createElement('p', null, `First name: ${user.fisrtName}`)
-        const userLastName = createElement('p', null, `Last name: ${user.lastName || 'Not specified'}`)
-        const userEmail = createElement('p', null, `Email: ${user.email || 'Not specified'}`)
-        const userPhone = createElement('p', null, `Phone: ${user.phone || 'Not specified'}`)
-
-        profileContainer.append(userLogin, userFirstName, userLastName, userEmail, userPhone)
-        return profileContainer
     }
 }
